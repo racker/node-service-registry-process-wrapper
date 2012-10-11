@@ -1,0 +1,163 @@
+#!/usr/bin/env node
+
+var constants = require('constants');
+var spawn = require('child_process').spawn;
+
+var async = require('async');
+var optimist = require('optimist');
+var Client = require('service-registry-client').Client;
+
+var argv = optimist
+  .usage('Usage: $0 --id=<service id> --tags=<tag1,tag2,tag3> --metadata=<key1=value1,key2=value2> [--abort-on-failure] <process binary> <process args>')
+  .alias('t', 'tags')
+  .alias('m', 'metadata')
+  .alias('i', 'interval')
+  .default('interval', 30)
+  .describe('username', 'API username')
+  .describe('api-key', 'API key')
+  .describe('id', 'Service id')
+  .describe('tags', 'Service tags')
+  .describe('metadata', 'Service metadata')
+  .describe('session-metadata', 'Session metadata')
+  .describe('interval', 'Session heartbeat interval')
+  .describe('retries', 'How many times to try to retry registering a service if it fails')
+  .describe('abort-on-failure', 'Abort program execution and exit if the service registry client throws an error')
+  .argv;
+
+var SIGNALS = Object.keys(constants).filter(function(name) {
+  return name.indexOf('SIG') === 0;
+});
+
+function metadataStrToDict(str) {
+  var tmp, result = {};
+
+  tmp = str || '';
+  tmp = tmp.split(',');
+
+  tmp.forEach(function(item) {
+    var pair = item.split('='), key, value;
+
+    if (pair.length === 2) {
+      key = pair[0];
+      value = pair[1];
+      result[key] = value;
+    }
+  });
+
+  return result;
+}
+
+function main() {
+  var tmp, serviceId = argv.id, tags, serviceMetadata = {},
+      sessionMetadata = {}, heartbeatInterval = parseInt(argv.interval, 10);
+
+  if (argv._.length === 0) {
+    optimist.showHelp();
+    process.exit(1);
+  }
+
+  tags = argv.tags || '';
+  tags = tags.split(',');
+
+  sessionMetadata = metadataStrToDict(argv['session-metadata']);
+  serviceMetadata = metadataStrToDict(argv.metadata);
+
+  var client = new Client(argv.username, argv['api-key']),
+      skipRegistration = false;
+
+  async.waterfall([
+    function createSession(callback) {
+      client.sessions.create(heartbeatInterval, {'metadata': sessionMetadata}, function(err) {
+        if (err && !argv['abort-on-failure']) {
+          skipRegistration = true;
+          callback(null, null, null, null);
+          return;
+        }
+
+        callback.apply(null, arguments);
+      });
+    },
+
+    function registerService(sessionId, data, hb, callback) {
+      var payload, options = {};
+
+      if (skipRegistration) {
+        callback(null, null);
+        return;
+      }
+
+      payload = {
+        'tags': tags,
+        'metadata': serviceMetadata
+      };
+
+      if (argv.retries) {
+        options.retryCount = parseInt(argv.retries, 10);
+      }
+
+      client.services.register(sessionId, serviceId, payload, options, function(err) {
+        if (err) {
+          callback(err);
+          return;
+        }
+
+        callback(null, hb);
+      })
+    },
+
+    function spawnProcess(hb, callback) {
+      var cmd = argv._[0], args = argv._.splice(1), child;
+
+      child = spawn(cmd, args);
+
+      child.stdout.on('data', function(data) {
+        process.stdout.write(data);
+      });
+
+      child.stderr.on('data', function(data) {
+        process.stderr.write(data);
+      });
+
+      child.on('exit', function(code) {
+        process.exit(code);
+      });
+
+      function sendSignal(signal) {
+        child.kill(signal);
+      }
+
+      SIGNALS.forEach(function(signal) {
+        process.on(signal, sendSignal.bind(null, signal));
+      });
+
+      callback(null, hb);
+    },
+
+    function startHeartbeating(hb, callback) {
+      if (skipRegistration) {
+        callback();
+        return;
+      }
+
+      hb.start();
+      callback();
+    }
+  ],
+
+  function(err) {
+    if (err) {
+      console.error(err)
+      process.exit(100);
+      return;
+    }
+  });
+}
+
+process.on('uncaughtException', function(err) {
+  if (argv['abort-on-failure']) {
+    console.error(err);
+    process.exit(1);
+  }
+});
+
+main();

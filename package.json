@@ -1,0 +1,41 @@
+{
+  "name": "service-registry-wrapper",
+  "description": "Process wrapper which allows you to register arbitrary long-running process with Rackspace Service Registry.",
+  "version": "0.1.0",
+  "author": "Rackspace Hosting <sr@rackspace.com>",
+  "contributors": [{"name": "Shawn Smith", "email": "shawn.smith@rackspace.com", "url": "http://shawnps.net"}, {"name": "Tomaz Muraus", "email": "tomaz.muraus@rackspace.com", "url": "http://www.tomaz.me"}],
+  "private" : true,
+  "keywords": [ "rackspace", "cloud", "service registry", "service discovery", "registry", "process wrapper"],
+  "homepage": "https://github.com/racker/node-service-registry-process-wrapper",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/racker/node-service-registry-process-wrapper.git"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {
+    "lint": "./scripts/lint.sh"
+  },
+  "dependencies": {
+    "async": "= 0.1.22",
+    "optimist": ">= 0.3.4",
+    "sprintf": "= 0.1.1",
+    "logmagic": "= 0.1.4",
+    "rackspace-shared-utils": "0.1.14",
+    "keystone-client": ">= 0.3.0",
+    "service-registry-client": ">= 0.1.0"
+  },
+  "devDependencies": {
+     "jshint": "0.5.9"
+  },
+  "engines": {
+    "node": ">= 0.6.0 && < 0.9.0"
+  },
+  "licenses" : [
+    {
+      "type" : "Apache",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  ]
+}
