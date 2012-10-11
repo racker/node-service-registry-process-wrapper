@@ -8,7 +8,10 @@ var optimist = require('optimist');
 var Client = require('service-registry-client').Client;
 
 var argv = optimist
-  .usage('Usage: $0 --id=<service id> --tags=<tag1,tag2,tag3> --metadata=<key1=value1,key2=value2> [--abort-on-failure] <process binary> <process args>')
+  .usage('Usage: $0 --id=<service id> --tags=<tag1,tag2,tag3> ' +
+         '--metadata=<key1=value1,key2=value2> ' +
+         '--session-metadata=<key1=value1,key2=value2> [--abort-on-failure]' +
+         ' <process binary> <process args>')
   .alias('t', 'tags')
   .alias('m', 'metadata')
   .alias('i', 'interval')
