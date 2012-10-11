@@ -12,7 +12,7 @@
     "url": "git://github.com/racker/node-service-registry-process-wrapper.git"
   },
   "directories": {
-    "lib": "./lib"
+    "bin": "./bin"
   },
   "scripts": {
     "lint": "./scripts/lint.sh"
