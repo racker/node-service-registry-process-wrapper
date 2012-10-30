@@ -16,6 +16,7 @@ var argv = optimist
   .alias('m', 'metadata')
   .alias('i', 'interval')
   .default('interval', 30)
+  .boolean('abort-on-failure')
   .describe('username', 'API username')
   .describe('api-key', 'API key')
   .describe('id', 'Service id')
