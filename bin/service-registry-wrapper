@@ -61,7 +61,13 @@ function main() {
   }
 
   tags = argv.tags || '';
-  tags = tags.split(',');
+
+  if (tags.length > 1) {
+    tags = tags.split(',');
+  }
+  else {
+    tags = [];
+  }
 
   sessionMetadata = metadataStrToDict(argv['session-metadata']);
   serviceMetadata = metadataStrToDict(argv.metadata);
