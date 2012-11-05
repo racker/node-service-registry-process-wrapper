@@ -4,7 +4,6 @@
   "version": "0.1.1",
   "author": "Rackspace Hosting <sr@rackspace.com>",
   "contributors": [{"name": "Shawn Smith", "email": "shawn.smith@rackspace.com", "url": "http://shawnps.net"}, {"name": "Tomaz Muraus", "email": "tomaz.muraus@rackspace.com", "url": "http://www.tomaz.me"}],
-  "private" : true,
   "keywords": [ "rackspace", "cloud", "service registry", "service discovery", "registry", "process wrapper"],
   "homepage": "https://github.com/racker/node-service-registry-process-wrapper",
   "repository": {
